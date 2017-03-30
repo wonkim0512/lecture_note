@@ -1,0 +1,108 @@
+#뉴스 크롤링
+from bs4 import BeautifulSoup
+import requests
+import re
+
+
+class NaverCrawling(object):
+    def __init__(self):
+        self.today = datetime.datetime.now().strftime("%Y%m%d")
+        self.url = 'http://news.naver.com/main/list.nhn?sid2=230&sid1=105&mid=shm&mode=LS2D&date={}&page='.format(self.today)
+    
+    def naver_news_link(self):
+        i=1
+        unique_news_link = []
+        for page_num in range(30) :
+            try :
+                res = requests.get(self.url+str(i))
+                soup = BeautifulSoup(res.text, 'html.parser')
+                news_link = soup.select('ul.type06_headline > li > dl > dt > a[href]')
+                news_link2 = soup.select('ul.type06 > li > dl > dt > a[href]')
+                for link_num in range(len(news_link)):
+                    if news_link[link_num].get('href') not in unique_news_link :
+                        unique_news_link.append(news_link[link_num].get('href'))
+                for link_num in range(len(news_link2)):
+                    if news_link2[link_num].get('href') not in unique_news_link :
+                        unique_news_link.append(news_link2[link_num].get('href'))
+                i += 1
+            except :
+                break
+        print i
+        return unique_news_link
+    
+    def get_news(self, naver_news_link) :
+        get_news = []
+        for news_num in range(len(naver_news_link)) :
+            try :
+                res = requests.get(naver_news_link[news_num])
+                soup = BeautifulSoup(res.text, 'html.parser')
+                title_content = []
+                title = soup.select('h3#articleTitle')[0].get_text()
+                content = soup.select('div#articleBodyContents')
+                content = news_link[0].get_text()
+                title_content.append(title)
+                title_content.append(content)
+                title_content.append(datetime.datetime.now().strftime("%Y-%m-%d, %H:%M"))
+                get_news.append(title_content)
+            except :
+                pass
+        return get_news
+
+naver_crawling = NaverCrawling()
+naver_news_link = naver_crawling.naver_news_link()
+get_news = naver_crawling.get_news(naver_news_link)
+get_news
+
+
+# 기본환경 구축
+# -*- coding: utf-8 -*-
+import os
+from sqlalchemy import Column, ForeignKey, Integer, CHAR, Date, String, Time, Index, DateTime, TIMESTAMP, func
+from sqlalchemy.dialects.mysql import INTEGER, BIT, TINYINT, TIME, DOUBLE, TEXT
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
+from sqlalchemy import create_engine
+from sqlalchemy import PrimaryKeyConstraint
+from sqlalchemy.orm import sessionmaker
+
+Base = declarative_base()
+
+server = '서버주소'
+connection_string = 'mysql+mysqldb://root:비번@{}:3306/naver_news_crawling?charset=utf8'.format(server)
+engine = create_engine(connection_string, pool_recycle=3600, encoding='utf-8')
+Session = sessionmaker(bind=engine)
+session = Session()
+
+# 클래스 생성
+class News(Base):
+    __tablename__ = 'news'
+    __table_args__ = {'extend_existing': True} 
+    
+    ID = Column(Integer, primary_key = True, autoincrement = True)
+    Title = Column(String(300), default='N/A')
+    Content = Column(String(5000), default='N/A')
+    CrawlingTime = Column(String(45))
+    
+    def __repr__(self):
+        return '%d %s %s %s' %(self.ID, self.Title, self.Content, self.CrawlingTime)
+
+#데이터 DB저장 클래스
+class SaveNews(object):
+    def save_news(self, get_news):
+        for news_num in range(len(get_news)):
+            i1 = News(
+                        Title = get_news[news_num][0].encode('utf-8'),
+                        Content = get_news[news_num][1].encode('utf-8'),
+                        CrawlingTime = get_news[news_num][2].encode('utf-8')
+                        )
+            session.add(i1)
+        session.commit()
+        session.close()
+        
+save_news1 = SaveNews()
+save_news = save_news1.save_news(get_news)
+
+#내용 확인
+news = session.query(News).filter(News.ID<2).all()
+for row in news :
+    print row.Title, row.Content, row.CrawlingTime
