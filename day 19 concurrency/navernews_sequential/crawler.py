@@ -67,7 +67,7 @@ urls = r.lrange('urls', 0, -1)
 newsdao = NewsDAO()
 crawler = NaverNewsCrawler(newsdao, urls)
 
-import time 
+import time
 start = time.time()
 crawler.crawl_link()
 end = time.time()
