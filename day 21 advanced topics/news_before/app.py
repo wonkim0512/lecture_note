@@ -39,9 +39,15 @@ def simple():
 
     return render_template('simple2.html',
                                         name = 'aaron',
-                                        age=32,
+                                        age=26,
                                         languages = ['python', 'java', 'c++', 'c#'],
                                         gadgets = gadgets)
+@app.route('/subscription')
+def subscription():
+    # html file은 templates 폴더에 위치해야 함
+
+    return render_template('subscription.html')
+
 
 from pymongo import MongoClient, DESCENDING
 
@@ -52,15 +58,31 @@ def simple_post():
 
     print name, age
 
-    mongo = MongoClient(host='54.149.163.97', port=27017)
-    test = mongo.data2.test
+    mongo = MongoClient(host='ec2-35-167-74-63.us-west-2.compute.amazonaws.com', port=27017)
+    test = mongo.data2.user
 
     test.insert_one({'name' : name, 'age' : age})
 
     mongo.close()
 
     return '이름 :  {} 나이 : {} 등록 완료'.format(name, age)
-    
+
+@app.route('/subscription_post', methods=['POST'])
+def subscription_post():
+    ID = request.form['ID']
+    PWD = request.form['PWD']
+
+    print ID, PWD
+
+    mongo = MongoClient(host='ec2-35-167-74-63.us-west-2.compute.amazonaws.com', port=27017)
+    test = mongo.data2.subscription
+
+    test.insert_one({'ID' : ID, 'PWD' : PWD})
+
+    mongo.close()
+
+    return 'ID :  {} PWD : {} 가입 완료'.format(ID, PWD)
+
 
 if __name__ == '__main__':
     # 모든 호스트에서 접속 가능
