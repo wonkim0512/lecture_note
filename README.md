@@ -9,5 +9,3 @@ Data Science School Jupyter Notebook
  Numpy, Pandas, Matplotlib, Scikit-learn
  RDB, MySQL, NOSQL
  Web Crawling
- REST API
-
