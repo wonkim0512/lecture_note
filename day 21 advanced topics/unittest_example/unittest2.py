@@ -19,6 +19,6 @@ class TestSample(unittest.TestCase):
 
 # python abc.py
 # python abc.py -v (verbose)
-# python -m unittest abc bac cab
+# python -m unittest abc bac cab         # 확장자명 안적어도 되고 여러개 실행가능
 if __name__ == '__main__':
     unittest.main()
