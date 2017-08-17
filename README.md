@@ -7,4 +7,4 @@ Data Science School Jupyter Notebook
  Python language,
  Numpy, Pandas, Matplotlib, Scikit-learn,
  RDB, MySQL, NOSQL,
- Web Crawling
+ Web Crawling, etc.
